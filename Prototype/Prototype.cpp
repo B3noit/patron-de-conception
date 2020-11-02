@@ -1,78 +1,73 @@
 // Prototype.cpp : Ce fichier contient la fonction 'main'. L'exécution du programme commence et se termine à cet endroit.
 //
-
 #include <iostream>
-#include <vector>
-#include <initializer_list>
 
-
-class Robot										//La classe robot est la classe a partir de laquelle tous les prototypes sont construits
-{
+class Robot {										//La classe dont hérite les robots fabriqués
 public:
-	virtual Robot* clone() = 0;
-	virtual void activation() = 0;				//Active le robot et indique son type
+	virtual ~Robot() {}
+	virtual std::string Operation() const = 0;
 };
 
-class Factory {									//la classe factory nous sert de fabrique pour les prototypes
+
+class RobotJump : public Robot {				//La classe des robotjump
 public:
-	static Robot* make_robot(int choice);		//Clone/crée un prototype
-private:
-	static Robot* s_prototypes[4];				//repertorie les choix possibles
+	std::string Operation() const override {
+		return "{RobotJump a ete lance}";
+	}
 };
+class RobotPunch : public Robot {				//La classe des robotpunch
+public:
+	std::string Operation() const override {
+		return "{RobotPunch a ete lance}";
+	}
+};
+
+
+class Creator {		//La classe creator dont les sous-classe de créateurs de robots héritent
+public:
+	virtual ~Creator() {};
+	virtual Robot* FactoryMethod() const = 0;
+
+	std::string SomeOperation() const {
+		//appelle la méthode factory qui elle crée réellement le robot
+		Robot* robot = this->FactoryMethod();
+		//on appelle une méthode du robot crée pour prouver que cela fonctionne.
+		std::string result = "Le Creator vient de confirmer que " + robot->Operation();
+		delete robot;
+		return result;
+	}
+};
+
+class CreatorRobotJump : public Creator {		//les sous classes de créateurs surcharge la méthode factory						
+public:											//pour crée les robots qui leurs sont attribués
+	Robot* FactoryMethod() const override {
+		return new RobotJump();
+	}
+};
+class CreatorRobotPunch : public Creator {
+public:
+	Robot* FactoryMethod() const override {
+		return new RobotPunch();
+	}
+};
+
+
+void GenieDuMal(const Creator& creator) {// fonction a l'origine de la demande de la création d'un robot
+
+	std::cout << "Genie du mal :\"Je veux lancer un robot ! Peu importe lequel depechez-vous!\"\n"
+		<< creator.SomeOperation() << std::endl;
+}
 
 int main() {
-	std::vector<Robot*> roles;					//répertorie tous les choix de robots que l'utilisateur veut créer.
-	int choice;
+	std::cout << "Lancment d'un RobotJump\n";
+	Creator* creator = new CreatorRobotJump();//test robot jump
+	GenieDuMal(*creator);
+	std::cout << std::endl;
+	std::cout << "Lancment d'un RobotPunch\n";
+	Creator* creator2 = new CreatorRobotPunch();//test robot punch
+	GenieDuMal(*creator2);
 
-	while (true) {
-		std::cout << "RobotJump(1) RobotPunch(2) RobotDrive(3) Go(4): "; //indique les choix GO = lancer le programme
-		std::cin >> choice;//input des choix utilisateur
-		if (choice == 0)
-			break;
-		roles.push_back(Factory::make_robot(choice)); //Ajoute le choix de l'utilisateur dans le vector roles
-	}
-
-	for (int i = 0; i < roles.size(); ++i) //Boucle pour activer tous les robots répertoriés.
-		roles[i]->activation();
-	for (int i = 0; i < roles.size(); ++i)//Boucle pour vider le vector roles
-		delete roles[i];
+	delete creator;
+	delete creator2;
+	return 0;
 }
-
-
-class RobotJump : public Robot
-{
-public:
-	Robot* clone() { return new RobotJump;}
-	void activation()
-	{
-		std::cout << "RobotJump : jump high\n";
-	}
-};
-
-class RobotPunch : public Robot
-{
-public:
-	Robot* clone() { return new RobotPunch; }
-	void activation()
-	{
-		std::cout << "RobotPunch : punch hard\n";
-	}
-};
-class RobotDrive : public Robot
-{
-public:
-	Robot* clone() { return new RobotDrive; }
-	void activation()
-	{
-		std::cout << "RobotDrive : drift with style\n";
-	}
-};
-
-
-Robot* Factory::s_prototypes[] = {                            //tableau repertoriant les robots/objets clonables
-   0, new RobotJump, new RobotPunch, new RobotDrive
-};
-Robot* Factory::make_robot(int choice) {
-	return s_prototypes[choice]->clone();					//méthode appelant la méthode clone de la classe de l'objet à cloner
-}
-
