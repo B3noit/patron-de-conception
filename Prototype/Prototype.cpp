@@ -6,36 +6,35 @@
 #include <initializer_list>
 
 
-class Robot 
+class Robot										//La classe robot est la classe a partir de laquelle tous les prototypes sont construits
 {
 public:
 	virtual Robot* clone() = 0;
-	virtual void activation() = 0;
+	virtual void activation() = 0;				//Active le robot et indique son type
 };
 
-class Factory {
+class Factory {									//la classe factory nous sert de fabrique pour les prototypes
 public:
-	static Robot* make_robot(int choice);
+	static Robot* make_robot(int choice);		//Clone/crée un prototype
 private:
-	static Robot* s_prototypes[4];
+	static Robot* s_prototypes[4];				//repertorie les choix possibles
 };
 
 int main() {
-	std::vector<Factory> roles;
+	std::vector<Robot*> roles;					//répertorie tous les choix de robots que l'utilisateur veut créer.
 	int choice;
 
 	while (true) {
-		std::cout << "RobotJump(1) RobotPunch(2) RobotDrive(3) Go(0): ";
-		std::cin >> choice;
+		std::cout << "RobotJump(1) RobotPunch(2) RobotDrive(3) Go(4): "; //indique les choix GO = lancer le programme
+		std::cin >> choice;//input des choix utilisateur
 		if (choice == 0)
 			break;
-		Factory::make_robot(choice);
-		roles.push_back(Factory::make_robot(choice));
+		roles.push_back(Factory::make_robot(choice)); //Ajoute le choix de l'utilisateur dans le vector roles
 	}
 
-	for (int i = 0; i < roles.size(); ++i)
+	for (int i = 0; i < roles.size(); ++i) //Boucle pour activer tous les robots répertoriés.
 		roles[i]->activation();
-	for (int i = 0; i < roles.size(); ++i)
+	for (int i = 0; i < roles.size(); ++i)//Boucle pour vider le vector roles
 		delete roles[i];
 }
 
@@ -70,10 +69,10 @@ public:
 };
 
 
-Robot* Factory::s_prototypes[] = {
+Robot* Factory::s_prototypes[] = {                            //tableau repertoriant les robots/objets clonables
    0, new RobotJump, new RobotPunch, new RobotDrive
 };
 Robot* Factory::make_robot(int choice) {
-	return s_prototypes[choice]->clone();
+	return s_prototypes[choice]->clone();					//méthode appelant la méthode clone de la classe de l'objet à cloner
 }
 
