@@ -2,72 +2,31 @@
 //
 #include <iostream>
 
-class Robot {										//La classe dont hérite les robots fabriqués
+class SingletonInt
+{
 public:
-	virtual ~Robot() {}
-	virtual std::string Operation() const = 0;
-};
+	SingletonInt(const SingletonInt&) = delete; //On suprime le constructeur par copie ainsi on ne risque pas de créer des copies de notre singleton
 
-
-class RobotJump : public Robot {				//La classe des robotjump
-public:
-	std::string Operation() const override {
-		return "{RobotJump a ete lance}";
+	static SingletonInt& Get() //le mot clef static permet de nous assurer qu'il n'y aura qu'une seule instance de SingletonInt
+	{
+		static SingletonInt monSingletonInt; //Le singleton sera crée une fois, uniquement lors du premeir appelle de cette fonction grâce au mot clef static
+		return monSingletonInt;
 	}
-};
-class RobotPunch : public Robot {				//La classe des robotpunch
-public:
-	std::string Operation() const override {
-		return "{RobotPunch a ete lance}";
-	}
-};
+
+	int maVariable() { return nVariable; } //Cette fonction retourn une donnée membre de la classe, elle n'est pas nécessair mais démontre que notre singleton est bien une classe 
+										   //comme les autres et qu'elle peut gérer tous les aspects d'une classe normale(donnée membre, méthodes etc...)
+private:
+	SingletonInt() {}
+
+	int nVariable = 2;					//Donnée membre de mon singleton 
 
 
-class Creator {		//La classe creator dont les sous-classe de créateurs de robots héritent
-public:
-	virtual ~Creator() {};
-	virtual Robot* FactoryMethod() const = 0;
 
-	std::string SomeOperation() const {
-		//appelle la méthode factory qui elle crée réellement le robot
-		Robot* robot = this->FactoryMethod();
-		//on appelle une méthode du robot crée pour prouver que cela fonctionne.
-		std::string result = "Le Creator vient de confirmer que " + robot->Operation();
-		delete robot;
-		return result;
-	}
-};
-
-class CreatorRobotJump : public Creator {		//les sous classes de créateurs surcharge la méthode factory						
-public:											//pour crée les robots qui leurs sont attribués
-	Robot* FactoryMethod() const override {
-		return new RobotJump();
-	}
-};
-class CreatorRobotPunch : public Creator {
-public:
-	Robot* FactoryMethod() const override {
-		return new RobotPunch();
-	}
 };
 
 
-void GenieDuMal(const Creator& creator) {// fonction a l'origine de la demande de la création d'un robot
-
-	std::cout << "Genie du mal :\"Je veux lancer un robot ! Peu importe lequel depechez-vous!\"\n"
-		<< creator.SomeOperation() << std::endl;
-}
-
-int main() {
-	std::cout << "Lancment d'un RobotJump\n";
-	Creator* creator = new CreatorRobotJump();//test robot jump
-	GenieDuMal(*creator);
-	std::cout << std::endl;
-	std::cout << "Lancment d'un RobotPunch\n";
-	Creator* creator2 = new CreatorRobotPunch();//test robot punch
-	GenieDuMal(*creator2);
-
-	delete creator;
-	delete creator2;
-	return 0;
+int main()
+{
+	int nManaMx = SingletonInt::Get().maVariable(); //On appele le singleton pour utiliser une se ces fonctions.
+		std::cout << nManaMx;
 }
